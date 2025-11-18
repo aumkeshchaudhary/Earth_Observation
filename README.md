@@ -130,7 +130,6 @@ Plotted:
 ## 5. Repository Structure
 
       Earth-Observation-Delhi-Airshed
-      ├── Earth_Observation.ipynb       # Complete pipeline (Q1–Q3)
       ├── outputs/
       │   ├── images_filtered.csv
       │   ├── train_split.csv
@@ -142,7 +141,8 @@ Plotted:
       │       ├── correct_0_true_X_pred_X.png
       │       ├── correct_1_true_X_pred_X.png
       │       ├── incorrect_0_true_X_pred_Y.png
-      │       └── ...
+      │       └── 
+      ├── Earth_Observation.ipynb       # Complete pipeline (Q1–Q3)
       └── README.md
 
 
