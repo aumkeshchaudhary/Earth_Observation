@@ -104,12 +104,12 @@ Final class = **Built-up** (majority class).
 Used:
 
      train_test_split(..., test_size=0.4, stratify=labels, random_state=42)
-  If a class had <2 samples, stratification fails.
-  In these cases, a fallback non-stratified split with fixed seed was used.
+ If a class had <2 samples, stratification fails. In these cases, a fallback non-stratified split with fixed seed was used.
+
   
 ### 3.6 Class Distribution Visualization
 - Generated bar plot of class counts
-- Discussed imbalance (built-up and cropland dominate, etc.)
+- Discussed class imbalance based on extracted labels.
 
 ---
 
@@ -127,7 +127,7 @@ Used:
 Manually calculated:
 - TP, FP, FN  
 - Macro F1
-- weighted F1  
+- Weighted F1  
 
 ### 4.3 torchmetrics.F1Score
 - Compared with manual implementation  
