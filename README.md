@@ -11,12 +11,12 @@ This project covers:
 
 - Spatial gridding of Delhi-NCR  
 - Satellite-basemap visualization  
-- Image filtering using geospatial coordinates  
-- Land-cover label extraction (from ESA WorldCover raster)  
-- Dataset creation for supervised learning  
-- Training a ResNet18 classifier  
-- Evaluation using F1-scores and confusion matrix  
-- Visualizing correct & incorrect predictions  
+- Filtering Sentinel-2 image patches by geospatial location
+- Extracting land-cover patches from ESA WorldCover 
+- Label assignment via mode of land-cover pixels 
+- Train/test dataset construction
+- Training a ResNet18 classifier
+- Computing F1-scores, confusion matrices, and prediction visualizations
 
 All code is contained in:  
 **`Earth_Observation.ipynb`**
@@ -27,40 +27,49 @@ All code is contained in:
 
 ### 2.1 Delhi-NCR Shapefile + Grid Overlay
 - Loaded shapefile using `geopandas`
-- Transformed CRS to **EPSG:32644**
-- Created a **60 × 60 km uniform grid**
-- Visualized using `matplotlib`
+- Reprojected to EPSG:32644 (UTM zone) because a 60×60 km grid requires a metric CRS
+- Constructed a uniform **60 km × 60 km** grid over the polygon
+- Visualized the grid using matplotlib
 
 ### 2.2 Satellite Basemap Overlay
 - Used `geemap.Map()`
 - Added `"SATELLITE"` basemap
-- Overlaid the grid with transparency
+- Reprojected grid back to EPSG:4326 for display on geemap
+  (grid = grid.to_crs(4326))
 
 ### 2.3 Marking Grid Corners & Centers
-- Computed:
-  - Four corners
-  - Centroid of each grid cell
-- Plotted each on the basemap
+- Extracted the four corners (minx,miny), (maxx,miny), (maxx,maxy), (minx,maxy)
+- Computed centroid using cell.centroid
+- Plotted corners + centroid on the basemap
 
-### 2.4 Filtering Image Patches
-- PNG filenames contain `(lat, lon)`
-- Checked if each point falls inside any grid polygon
-- Stored filtered images into `images_filtered.csv`
+### 2.4 Filtering Sentinel-2 Image Patches
+Each PNG file has center coordinates embedded in filename:
+ image_lat_lon.png (lat, lon in EPSG:4326)
+
+Steps:
+- Parsed (lat, lon)
+- Converted to geometry and reprojected to EPSG:32644
+- Checked if point lies inside any grid polygon
+- Saved filtered images to images_filtered.csv
 
 ### 2.5 Image Count
-- Printed number of images before and after filtering.
+- Printed number of images before filtering
+- Printed number after filtering
 
 ---
 
 ## 3. Label Construction & Dataset Preparation (Q2)
 
-### 3.1 Extracting Land-Cover Patch
-For each Sentinel-2 image:
-- Read `land_cover.tif` using `rasterio`
-- Converted image center coordinate to raster index
-- Extracted a **128 × 128** land-cover patch
+### 3.1 Extracting 128×128 Land-Cover Patch
+For each Sentinel-2 RGB patch:
+- Loaded land_cover.tif using rasterio
+- Converted (lon, lat) → raster pixel indices using dataset.index()
+- Extracted a 128×128 window centered on that pixel
+- Handled raster boundaries & nodata conditions
 
 ### 3.2 Mode-Based Label Assignment
+A patch typically contains many classes:
+
 Example pixel counts:
 - Built-up (50) → 8000 pixels  
 - Cropland (40) → 3000 pixels  
@@ -84,16 +93,23 @@ Final class = **Built-up** (majority class).
 | 100 | Moss / Lichen |
 
 ### 3.4 Handling Edge Cases
-- **No-data pixels** → sample skipped  
-- **Coordinates outside raster** → skipped  
-- **Mixed class dominance** → used strongest mode  
-- **Heavily noisy patches** → removed from dataset  
+- Coordinates outside raster bounds → skipped
+- Patches with >30% nodata → removed
+- Mixed class dominance → strong mode chosen
+- Tie situations → lowest ESA class code selected
+
 
 ### 3.5 Train-Test Split (60/40)
-Performed using `train_test_split` with stratification.
 
+Used:
+
+     train_test_split(..., test_size=0.4, stratify=labels, random_state=42)
+  If a class had <2 samples, stratification fails.
+  In these cases, a fallback non-stratified split with fixed seed was used.
+  
 ### 3.6 Class Distribution Visualization
-Generated a bar plot showing imbalance across classes.
+- Generated bar plot of class counts
+- Discussed imbalance (built-up and cropland dominate, etc.)
 
 ---
 
@@ -101,29 +117,31 @@ Generated a bar plot showing imbalance across classes.
 
 ### 4.1 CNN Model Training
 - Used **ResNet18**
-- Trained on 128×128 RGB images
-- Optimizer: Adam  
-- Loss: CrossEntropyLoss  
+- Image input size: 128×128 RGB
+- Pretrained ImageNet weights
+- Modified final FC to match number of classes
+- Loss: CrossEntropyLoss
+- Optimizer: Adam
 
 ### 4.2 Custom F1-Score Implementation
 Manually calculated:
 - TP, FP, FN  
-- Macro and weighted F1 scores  
+- Macro F1
+- weighted F1  
 
 ### 4.3 torchmetrics.F1Score
 - Compared with manual implementation  
-- Discussed minor differences in rounding
+- Differences only due to rounding & averaging behaviour
 
 ### 4.4 Confusion Matrix
-Generated using:
-- `sklearn.metrics.confusion_matrix`
-- Normalized heatmap
+- Computed using sklearn.metrics.confusion_matrix
+- Row-normalized heatmap saved to confusion_matrix.png
 
 ### 4.5 Correct & Incorrect Prediction Visualization
-Plotted:
-- 5 correctly classified images  
-- 5 misclassified images  
-- Included true + predicted labels  
+Saved:
+- 5 correctly classified images 
+- 5 misclassified images
+Each contains true + predicted labels.
 
 ---
 
@@ -152,22 +170,22 @@ Plotted:
 
 ## 6. Technologies Used
 
-- Python  
-- geopandas  
-- rasterio  
-- shapely  
-- pyproj  
-- numpy / pandas  
-- PyTorch  
-- torchmetrics  
-- matplotlib  
-- geemap  
+- Python
+- geopandas
+- rasterio
+- shapely
+- pyproj
+- numpy / pandas
+- matplotlib
+- geemap
+- PyTorch
+- torchmetrics
 
 ---
 
 ## 7. Final Remarks
 
-This repository demonstrates a complete end-to-end Earth Observation ML pipeline using real geospatial datasets.  
-The work includes spatial processing, raster extraction, dataset creation, CNN training, and evaluation.
+This repository demonstrates a complete, end-to-end Earth Observation ML pipeline using real satellite data. It integrates spatial operations, raster label extraction, dataset building, CNN training, and evaluation.
 
+The pipeline is fully reproducible and follows best practices for geospatial machine learning.
 ---
