@@ -148,6 +148,11 @@ Each contains true + predicted labels.
 ## 5. Repository Structure
 
       Earth-Observation-Delhi-Airshed
+      ├── archive (15)    
+      |    ├──
+      |    ├──
+      |    ├──
+      |    └── 
       ├── outputs/
       │   ├── images_filtered.csv
       │   ├── train_split.csv
