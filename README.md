@@ -148,11 +148,14 @@ Each contains true + predicted labels.
 ## 5. Repository Structure
 
       Earth-Observation-Delhi-Airshed
-      ├── archive (15)    
-      |    ├──
-      |    ├──
-      |    ├──
-      |    └── 
+      ├── archive (15)/    
+      |    ├── rgb/
+      |    |     ├── 28.2056_76.8558.png
+      |    |     ├── 28.2056_76.8646.png
+      |    |     └── ........
+      |    ├── delhi_airshed.geojson
+      |    ├── delhi_ncr_region.geojson
+      |    └── worldcover_bbox_delhi_ncr_2021.tif
       ├── outputs/
       │   ├── images_filtered.csv
       │   ├── train_split.csv
