@@ -195,5 +195,4 @@ Each contains true + predicted labels.
 
 This repository demonstrates a complete, end-to-end Earth Observation ML pipeline using real satellite data. It integrates spatial operations, raster label extraction, dataset building, CNN training, and evaluation.
 
-The pipeline is fully reproducible and follows best practices for geospatial machine learning.
 ---
